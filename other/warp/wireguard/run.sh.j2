@@ -35,13 +35,27 @@ function generate_warp_config() {
   echo "Generating WARP config..."
   ./wgcf generate >/dev/null 2>&1
   sed -i 's/\[Peer\]/Table = off\n\[Peer\]/g' wgcf-profile.conf
-  curl --connect-timeout 1 -s https://v6.ident.me/ 2>&1 >/dev/null
-  if [ $? != 0 ] || [ $(cat /proc/sys/net/ipv6/conf/all/disable_ipv6) == 1 ]; then
-    # ipv6_exists=$(ip addr | grep -o 'inet6')
-    # if [ ! -n "$ipv6_exists" ]; then
+  
+  # Check if IPv6 is available on the host
+  curl -6 --connect-timeout 1 -s https://v6.ident.me/ 2>&1 >/dev/null
+  ipv6_available=$?
+  
+  if [ $ipv6_available != 0 ] || [ $(cat /proc/sys/net/ipv6/conf/all/disable_ipv6) == 1 ]; then
     echo "Removing IPV6 from WARP..."
     sed -i '/Address = [0-9a-fA-F:]\{4,\}/s/^/# /' wgcf-profile.conf
+  else
+    # IPv6 is available, add routing rules for it
+    echo "IPv6 is available, configuring WARP with IPv6 support..."
+    
+    # Extract IPv6 address from config
+    ipv6_addr=$(grep -oP 'Address = [^,]+, \K[0-9a-fA-F:]+/\d+' wgcf-profile.conf | head -1)
+    
+    if [ -n "$ipv6_addr" ]; then
+      # Add PostUp/PostDown rules for IPv6 routing
+      sed -i "/^MTU = /a PostUp = ip -6 route add default dev warp table 51820\nPostUp = ip -6 rule add from ${ipv6_addr} table 51820 pref 1000\nPostUp = ip -6 rule add oif warp table 51820 pref 999\nPostDown = ip -6 rule del oif warp table 51820 pref 999\nPostDown = ip -6 rule del from ${ipv6_addr} table 51820 pref 1000\nPostDown = ip -6 route del default dev warp table 51820" wgcf-profile.conf
+    fi
   fi
+  
   sed -i '/DNS = 1.1.1.1/s/^/# /' wgcf-profile.conf
   mkdir -p /etc/wireguard/
   ln -sf $(pwd)/wgcf-profile.conf /etc/wireguard/warp.conf
