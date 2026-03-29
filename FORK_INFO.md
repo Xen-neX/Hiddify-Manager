@@ -14,6 +14,16 @@
 
 ## 🚀 Быстрая установка
 
+### Предварительные требования
+
+```bash
+sudo apt update -y
+sudo apt upgrade -y
+sudo apt install -y nano git apt-utils curl
+```
+
+### Установка
+
 ```bash
 curl -o install_fork.sh https://raw.githubusercontent.com/Xen-neX/Hiddify-Manager/main/install_fork.sh
 chmod +x install_fork.sh

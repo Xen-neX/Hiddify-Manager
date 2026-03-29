@@ -20,6 +20,14 @@
 
 ## Быстрая установка
 
+### Предварительные требования
+
+```bash
+sudo apt update -y
+sudo apt upgrade -y
+sudo apt install -y nano git apt-utils curl
+```
+
 ### Шаг 1: Установка Hiddify Manager
 
 ```bash
