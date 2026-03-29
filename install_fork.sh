@@ -71,7 +71,17 @@ echo ""
 
 if [ -f "$INSTALL_DIR/fix_warp_ipv6.sh" ]; then
     chmod +x $INSTALL_DIR/fix_warp_ipv6.sh
-    bash $INSTALL_DIR/fix_warp_ipv6.sh
+    
+    # Check if WARP is actually configured (not just enabled in settings)
+    if [ -f "$INSTALL_DIR/other/warp/wireguard/wgcf-account.toml" ]; then
+        echo "WARP account found, applying IPv6 fix..."
+        bash $INSTALL_DIR/fix_warp_ipv6.sh
+    else
+        echo "WARP not configured yet."
+        echo "After enabling WARP in panel, run:"
+        echo "  cd /opt/hiddify-manager"
+        echo "  ./warp_ipv6_toggle.sh enable"
+    fi
 else
     echo "Warning: fix_warp_ipv6.sh not found in fork"
     echo "IPv6 WARP fix was not applied"
