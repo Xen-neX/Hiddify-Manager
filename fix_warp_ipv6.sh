@@ -24,8 +24,15 @@ fi
 cd /opt/hiddify-manager
 
 echo "Step 1: Regenerating configurations from templates..."
-bash apply_configs.sh > /dev/null 2>&1
-echo "✓ Configurations regenerated"
+timeout 120 bash apply_configs.sh > /dev/null 2>&1
+exit_code=$?
+if [ $exit_code -eq 124 ]; then
+    echo "⚠ Configuration regeneration timed out, continuing anyway..."
+elif [ $exit_code -eq 0 ]; then
+    echo "✓ Configurations regenerated"
+else
+    echo "⚠ Configuration regeneration had errors (exit code: $exit_code), continuing anyway..."
+fi
 
 echo ""
 echo "Step 2: Checking if WARP is enabled..."
@@ -47,13 +54,19 @@ if systemctl is-enabled wg-quick@warp > /dev/null 2>&1; then
         rm wgcf-profile.conf
     fi
     
-    # Run WARP setup
-    bash run.sh > /tmp/warp_setup.log 2>&1
+    # Run WARP setup with timeout
+    timeout 60 bash run.sh > /tmp/warp_setup.log 2>&1
+    exit_code=$?
     
-    if [ $? -eq 0 ]; then
+    if [ $exit_code -eq 124 ]; then
+        echo "✗ WARP setup timed out after 60 seconds"
+        echo "Check /tmp/warp_setup.log for details"
+        echo "WARP may still be starting in background..."
+        sleep 5
+    elif [ $exit_code -eq 0 ]; then
         echo "✓ WARP configuration regenerated"
     else
-        echo "✗ Error regenerating WARP configuration"
+        echo "✗ Error regenerating WARP configuration (exit code: $exit_code)"
         echo "Check /tmp/warp_setup.log for details"
         exit 1
     fi
