@@ -23,29 +23,17 @@ fi
 
 cd /opt/hiddify-manager
 
-echo "Step 1: Regenerating configurations from templates..."
-timeout 120 bash apply_configs.sh > /dev/null 2>&1
-exit_code=$?
-if [ $exit_code -eq 124 ]; then
-    echo "⚠ Configuration regeneration timed out, continuing anyway..."
-elif [ $exit_code -eq 0 ]; then
-    echo "✓ Configurations regenerated"
-else
-    echo "⚠ Configuration regeneration had errors (exit code: $exit_code), continuing anyway..."
-fi
-
-echo ""
-echo "Step 2: Checking if WARP is enabled..."
+echo "Step 1: Checking if WARP is enabled..."
 if systemctl is-enabled wg-quick@warp > /dev/null 2>&1; then
     echo "✓ WARP is enabled"
     
     echo ""
-    echo "Step 3: Stopping WARP service..."
+    echo "Step 2: Stopping WARP service..."
     systemctl stop wg-quick@warp
     echo "✓ WARP stopped"
     
     echo ""
-    echo "Step 4: Regenerating WARP configuration..."
+    echo "Step 3: Regenerating WARP configuration..."
     cd /opt/hiddify-manager/other/warp/wireguard
     
     # Backup existing config
@@ -72,7 +60,7 @@ if systemctl is-enabled wg-quick@warp > /dev/null 2>&1; then
     fi
     
     echo ""
-    echo "Step 5: Verifying IPv6 routing rules..."
+    echo "Step 4: Verifying IPv6 routing rules..."
     if grep -q "oif warp" /etc/wireguard/warp.conf; then
         echo "✓ IPv6 routing rules found in configuration"
         echo ""
@@ -86,7 +74,7 @@ if systemctl is-enabled wg-quick@warp > /dev/null 2>&1; then
     fi
     
     echo ""
-    echo "Step 6: Testing IPv6 connectivity through WARP..."
+    echo "Step 5: Testing IPv6 connectivity through WARP..."
     sleep 2
     
     # Test IPv6 through WARP
