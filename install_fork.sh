@@ -63,15 +63,18 @@ if [ $? -ne 0 ]; then
 fi
 
 # Step 2.5: Fix database configuration (mariadb -> localhost)
+# Note: This is now fixed in app.cfg template, but keeping for backwards compatibility
 echo ""
-echo "Fixing database configuration..."
+echo "Checking database configuration..."
 if [ -f "$INSTALL_DIR/hiddify-panel/app.cfg" ]; then
-    # Replace mariadb host with localhost for non-docker installations
-    sed -i 's/@mariadb\//@localhost\//g' "$INSTALL_DIR/hiddify-panel/app.cfg"
-    echo "✓ Database configuration fixed"
-    
-    # Restart panel to apply changes
-    systemctl restart hiddify-panel
+    if grep -q "@mariadb/" "$INSTALL_DIR/hiddify-panel/app.cfg"; then
+        sed -i 's/@mariadb\//@localhost\//g' "$INSTALL_DIR/hiddify-panel/app.cfg"
+        sed -i 's/@redis:/@localhost:/g' "$INSTALL_DIR/hiddify-panel/app.cfg"
+        echo "✓ Database configuration fixed"
+        systemctl restart hiddify-panel
+    else
+        echo "✓ Database configuration is correct"
+    fi
 fi
 
 # Step 3: Make IPv6 scripts executable
