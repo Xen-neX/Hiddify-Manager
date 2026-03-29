@@ -20,8 +20,9 @@ function check_warp_installed() {
         exit 1
     fi
     
-    if ! systemctl list-unit-files | grep -q "wg-quick@warp"; then
-        echo "Error: WARP service not installed"
+    if ! systemctl is-active wg-quick@warp >/dev/null 2>&1 && ! systemctl is-enabled wg-quick@warp >/dev/null 2>&1; then
+        echo "Error: WARP service not installed or not running"
+        echo "Please enable WARP in Hiddify Panel first"
         exit 1
     fi
 }
