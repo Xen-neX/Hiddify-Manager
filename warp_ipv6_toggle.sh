@@ -61,6 +61,12 @@ function enable_ipv6() {
     # Stop WARP
     systemctl stop wg-quick@warp 2>/dev/null || true
     
+    # Clean up old IPv6 routing rules (if any exist)
+    echo "Cleaning up old IPv6 rules..."
+    ip -6 rule del pref 999 2>/dev/null || true
+    ip -6 rule del pref 1000 2>/dev/null || true
+    ip -6 route del default dev warp table 51820 2>/dev/null || true
+    
     # Backup current config
     if [ -f "$WARP_CONF" ]; then
         cp "$WARP_CONF" "${WARP_CONF}.backup.$(date +%Y%m%d_%H%M%S)"
@@ -120,6 +126,12 @@ function disable_ipv6() {
     
     # Stop WARP
     systemctl stop wg-quick@warp 2>/dev/null || true
+    
+    # Clean up IPv6 routing rules
+    echo "Cleaning up IPv6 rules..."
+    ip -6 rule del pref 999 2>/dev/null || true
+    ip -6 rule del pref 1000 2>/dev/null || true
+    ip -6 route del default dev warp table 51820 2>/dev/null || true
     
     # Backup current config
     if [ -f "$WARP_CONF" ]; then
