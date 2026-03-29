@@ -74,29 +74,12 @@ if [ -f "$INSTALL_DIR/hiddify-panel/app.cfg" ]; then
     systemctl restart hiddify-panel
 fi
 
-# Step 3: Apply IPv6 WARP fix
-echo ""
-echo "=========================================="
-echo "Applying IPv6 WARP fix..."
-echo "=========================================="
-echo ""
-
+# Step 3: Make IPv6 scripts executable
+if [ -f "$INSTALL_DIR/warp_ipv6_toggle.sh" ]; then
+    chmod +x $INSTALL_DIR/warp_ipv6_toggle.sh
+fi
 if [ -f "$INSTALL_DIR/fix_warp_ipv6.sh" ]; then
     chmod +x $INSTALL_DIR/fix_warp_ipv6.sh
-    
-    # Check if WARP is actually configured (not just enabled in settings)
-    if [ -f "$INSTALL_DIR/other/warp/wireguard/wgcf-account.toml" ]; then
-        echo "WARP account found, applying IPv6 fix..."
-        bash $INSTALL_DIR/fix_warp_ipv6.sh
-    else
-        echo "WARP not configured yet."
-        echo "After enabling WARP in panel, run:"
-        echo "  cd /opt/hiddify-manager"
-        echo "  ./warp_ipv6_toggle.sh enable"
-    fi
-else
-    echo "Warning: fix_warp_ipv6.sh not found in fork"
-    echo "IPv6 WARP fix was not applied"
 fi
 
 echo ""
@@ -106,6 +89,10 @@ echo "=========================================="
 echo ""
 echo "Access your panel at:"
 echo "  https://$(curl -s https://v4.ident.me/)"
+echo ""
+echo "To enable IPv6 for WARP:"
+echo "  1. Enable WARP in Hiddify Panel"
+echo "  2. Run: cd /opt/hiddify-manager && ./warp_ipv6_toggle.sh enable"
 echo ""
 echo "Useful commands:"
 echo "  systemctl status hiddify-panel"
