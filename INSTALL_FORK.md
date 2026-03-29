@@ -1,6 +1,23 @@
 # Установка форка Hiddify Manager с исправлением IPv6
 
-## Вариант 1: Чистая установка (рекомендуется для новых серверов)
+## Рекомендуемый способ: Автоматическая установка
+
+Используйте специальный скрипт для установки форка:
+
+```bash
+# Скачайте и запустите установочный скрипт
+curl -o install_fork.sh https://raw.githubusercontent.com/Xen-neX/Hiddify-Manager/main/install_fork.sh
+chmod +x install_fork.sh
+./install_fork.sh
+```
+
+Скрипт автоматически:
+- Клонирует/обновляет форк
+- Создаст бэкап существующей установки (если есть)
+- Установит Hiddify Manager с конфигами из форка
+- Применит IPv6 WARP fix
+
+## Вариант 1: Чистая установка (ручной способ)
 
 Если у вас еще не установлен Hiddify Manager:
 
@@ -10,8 +27,8 @@ cd /opt
 git clone https://github.com/Xen-neX/Hiddify-Manager.git hiddify-manager
 cd hiddify-manager
 
-# 2. Запустите установку
-bash install.sh
+# 2. Запустите стандартный установщик Hiddify
+bash common/hiddify_installer.sh release --no-gui
 
 # 3. После установки примените IPv6 fix
 chmod +x fix_warp_ipv6.sh
