@@ -62,6 +62,18 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Step 2.5: Fix database configuration (mariadb -> localhost)
+echo ""
+echo "Fixing database configuration..."
+if [ -f "$INSTALL_DIR/hiddify-panel/app.cfg" ]; then
+    # Replace mariadb host with localhost for non-docker installations
+    sed -i 's/@mariadb\//@localhost\//g' "$INSTALL_DIR/hiddify-panel/app.cfg"
+    echo "✓ Database configuration fixed"
+    
+    # Restart panel to apply changes
+    systemctl restart hiddify-panel
+fi
+
 # Step 3: Apply IPv6 WARP fix
 echo ""
 echo "=========================================="
